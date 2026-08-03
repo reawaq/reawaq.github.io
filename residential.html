@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رواق - الأعمال السكنية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f3efe8; 
+            --text-main: #3b3228; 
+            --text-muted: #7a6e60; 
+            --accent-color: #8c7861; 
+            --border-color: #dfd8cb; 
+            --white: #ffffff;
+            --whatsapp-green: #25d366;
+            --btn-dark: #1a1815;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+        .fade-in { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .fade-in.appear { opacity: 1; transform: translateY(0); }
+
+        .mobile-menu-overlay { position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; background: var(--bg-color); z-index: 10000; display: flex; flex-direction: column; padding: 80px 30px 30px; transition: right 0.4s ease; }
+        .mobile-menu-overlay.active { right: 0; }
+        .mobile-menu-overlay a { font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .close-menu { position: absolute; top: 20px; right: 25px; background: none; border: none; font-size: 45px; color: var(--text-main); cursor: pointer; line-height: 1; }
+
+        header.navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-top: 10px; transition: 0.3s; }
+        
+        .logo a { display: flex; align-items: center; }
+        .logo img { max-height: 55px; width: auto; object-fit: contain; }
+        .footer-bottom .logo img { max-height: 50px; filter: brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(330deg) brightness(0.9); }
+
+        .nav-links { display: flex; background-color: var(--white); padding: 5px 20px; border-radius: 50px; box-shadow: 0 2px 10px rgba(140, 120, 97, 0.05); gap: 20px; border: 1px solid var(--border-color); }
+        .nav-links a { font-weight: 500; font-size: 15px; padding: 10px 15px; border-radius: 30px; transition: 0.3s; color: var(--text-main); }
+        .nav-links a.active, .nav-links a:hover { background-color: var(--bg-color); color: var(--accent-color); }
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-primary { background-color: var(--btn-dark); color: var(--white); padding: 12px 24px; border-radius: 30px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-lang { background-color: var(--white); border: 1px solid var(--border-color); padding: 12px 18px; border-radius: 30px; font-weight: 700; cursor: pointer; color: var(--text-main); }
+        .mobile-actions { display: none; }
+        .hamburger { background: transparent; border: 1px solid var(--border-color); border-radius: 50%; width: 42px; height: 42px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 20px; color: var(--text-main); }
+
+        .page-header { text-align: center; margin: 80px 0 60px; }
+        .page-header .label { color: var(--text-muted); font-size: 14px; margin-bottom: 10px; display: block; }
+        .page-header h1 { font-size: 52px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; color: var(--text-main); }
+        .page-header p { color: var(--text-muted); font-size: 16px; max-width: 600px; margin: 0 auto; }
+
+        .projects-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin-bottom: 100px; }
+        .project-card { background-color: var(--white); border-radius: 30px; overflow: hidden; border: 1px solid var(--border-color); transition: 0.3s; }
+        .project-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(140, 120, 97, 0.1); }
+        
+        .project-image { height: 350px; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .hero-image img, .portfolio-image img, .service-image img, .project-image img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; }
+
+        .project-info { padding: 30px; }
+        .project-info h3 { font-size: 24px; font-weight: 900; margin-bottom: 10px; }
+        .project-info p { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; line-height: 1.8; }
+        .project-tags { display: flex; gap: 10px; }
+        .tag { background-color: var(--bg-color); color: var(--accent-color); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; border: 1px solid rgba(140, 120, 97, 0.2); }
+
+        .cta-banner { background-color: var(--text-main); color: var(--white); text-align: center; padding: 80px 20px; border-radius: 40px 40px 0 0; }
+        .cta-banner h2 { font-size: 48px; font-weight: 900; margin-bottom: 30px; color: var(--bg-color); }
+        .footer-bottom { background-color: var(--text-main); padding: 0 20px 40px; }
+        .footer-content { max-width: 1100px; margin: 0 auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #a39686; }
+        .footer-links { display: flex; gap: 20px; }
+        .fab-whatsapp { position: fixed; bottom: 30px; left: 30px; background-color: var(--whatsapp-green); color: var(--white); padding: 12px 24px; border-radius: 30px; font-weight: 700; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); z-index: 1000; }
+
+        @media (max-width: 768px) {
+            body { font-size: 15px; }
+            .container { padding: 0 15px; }
+            header.navbar { flex-direction: row; background-color: var(--white); border-radius: 50px; padding: 8px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 15px; border: 1px solid var(--border-color); }
+            .nav-links, .nav-actions { display: none; }
+            .mobile-actions { display: flex; gap: 10px; align-items: center; }
+            .logo img { max-height: 40px; }
+            
+            .page-header { margin: 50px 0 40px; }
+            .page-header h1 { font-size: 38px; }
+            .projects-grid { grid-template-columns: 1fr; gap: 25px; }
+            .project-card { border-radius: 25px; }
+            .project-image { height: 220px; }
+            .cta-banner h2 { font-size: 36px; }
+            .footer-bottom { flex-direction: column; text-align: center; gap: 25px; padding-top: 25px; }
+            .footer-links { flex-direction: column; gap: 15px; align-items: center; }
+            .fab-whatsapp { bottom: 15px; left: 15px; padding: 12px 20px; font-size: 14px; border-radius: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-menu-overlay" id="mobileMenu">
+        <button class="close-menu" id="closeMenu">×</button>
+        <a href="index.html">الرئيسية</a>
+        <a href="services.html">الخدمات</a>
+        <a href="residential.html">الأعمال السكنية</a>
+        <a href="commercial.html">الأعمال التجارية</a>
+        <a href="https://iwtsp.com/966533771060" target="_blank">تواصل معنا</a>
+    </div>
+
+    <div class="container">
+        <header class="navbar fade-in">
+            <div class="mobile-actions">
+                <button class="hamburger" id="hamburgerMenu">☰</button>
+                <button class="btn-lang">EN</button>
+            </div>
+            <nav class="nav-links">
+                <a href="index.html">الرئيسية</a>
+                <a href="services.html">الخدمات</a>
+                <a href="#" class="active">الأعمال السكنية</a>
+                <a href="commercial.html">الأعمال التجارية</a>
+                <a href="https://iwtsp.com/966533771060" target="_blank">تواصل</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="btn-lang">EN</button>
+                <button class="btn-primary" onclick="window.open('https://iwtsp.com/966533771060', '_blank')">ابدأ مشروعك</button>
+            </div>
+            <div class="logo">
+                <a href="index.html">
+                    <img src="rawaq.png" alt="رواق">
+                </a>
+            </div>
+        </header>
+
+        <div class="page-header fade-in">
+            <span class="label">محفظة الأعمال</span>
+            <h1>الأعمال السكنية</h1>
+            <p>نصمم لك مساحة تشبهك، ليكون منزلك هو الملاذ الدافئ الذي يجمعك بمن تحب، متناغماً مع أسلوب حياتك اليومي.</p>
+        </div>
+
+        <div class="projects-grid">
+            <div class="project-card fade-in">
+                <div class="project-image"><img src="res-villa.jpg" alt="فيلا"></div>
+                <div class="project-info">
+                    <h3>فيلا الواحة - مودرن</h3>
+                    <p>تصميم فيلا سكنية على مساحة ٦٠٠ متر مربع، تعتمد على الواجهات الزجاجية الواسعة لدخول الإضاءة الطبيعية مع تفاصيل من الخشب الطبيعي.</p>
+                    <div class="project-tags">
+                        <span class="tag">فيلا سكنية</span>
+                        <span class="tag">تصميم معماري</span>
+                        <span class="tag">لاندسكيب</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card fade-in">
+                <div class="project-image"><img src="res-palace.jpg" alt="قصر"></div>
+                <div class="project-info">
+                    <h3>قصر النخيل - نيو كلاسيك</h3>
+                    <p>تصميم داخلي وخارجي لقصر يدمج بين فخامة الكلاسيك وبساطة المودرن، مع توزيع مثالي للمساحات المفتوحة وصالات الاستقبال.</p>
+                    <div class="project-tags">
+                        <span class="tag">قصر</span>
+                        <span class="tag">تصميم داخلي</span>
+                        <span class="tag">تأثيث</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="project-card fade-in">
+                <div class="project-image"><img src="res-chalet.jpg" alt="شاليه"></div>
+                <div class="project-info">
+                    <h3>شاليهات الرمال</h3>
+                    <p>تصميم استراحة وشاليه عائلي يركز على المساحات الترفيهية الخارجية، المسبح، وجلسات الشواء لضمان أفضل تجربة في عطلة نهاية الأسبوع.</p>
+                    <div class="project-tags">
+                        <span class="tag">استراحة</span>
+                        <span class="tag">واجهات</span>
+                        <span class="tag">إشراف</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card fade-in">
+                <div class="project-image"><img src="res-penthouse.jpg" alt="شقة فاخرة"></div>
+                <div class="project-info">
+                    <h3>بنتهاوس السحاب</h3>
+                    <p>إعادة تصميم وتقسيم شقة سكنية (بنتهاوس) بأسلوب عصري ذكي يستغل كل زاوية، مع إضافة لمسات من الإضاءة المخفية والألوان الدافئة.</p>
+                    <div class="project-tags">
+                        <span class="tag">شقة فاخرة</span>
+                        <span class="tag">توزيع ذكي</span>
+                        <span class="tag">تصميم داخلي</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- الفوتر -->
+    <div class="cta-banner fade-in">
+        <h2>نصمم منزل أحلامك،<br>خطوة بخطوة.</h2>
+        <button class="btn-primary" style="background-color: var(--bg-color); color: var(--text-main); border: none; cursor: pointer; font-family: 'Tajawal', sans-serif; padding: 14px 30px; border-radius: 30px; font-weight: 800; margin-top: 15px;" onclick="window.open('https://iwtsp.com/966533771060', '_blank')">تواصل معنا للبدء ↗</button>
+    </div>
+    <div class="footer-bottom fade-in">
+        <div class="footer-content">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="rawaq.png" alt="رواق">
+                </a>
+            </div>
+            <div class="footer-links">
+                <a href="https://iwtsp.com/966533771060" target="_blank">تواصل معنا</a>
+                <a href="https://www.instagram.com/rwaq.design" target="_blank">Instagram</a>
+                <a href="https://www.tiktok.com/@rwaq.design?_r=1&_t=ZS-98Yrxf0CAsO" target="_blank">TikTok</a>
+            </div>
+            <div>© ٢٠٢٦ شركة رواق — جميع الحقوق محفوظة</div>
+        </div>
+    </div>
+    <a href="https://iwtsp.com/966533771060" target="_blank" class="fab-whatsapp fade-in">واتساب ↗</a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const faders = document.querySelectorAll('.fade-in');
+            const appearOptions = { threshold: 0.15, rootMargin: "0px 0px -50px 0px" };
+            const appearOnScroll = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('appear');
+                    observer.unobserve(entry.target);
+                });
+            }, appearOptions);
+            faders.forEach(fader => { appearOnScroll.observe(fader); });
+
+            const hamburgerBtn = document.getElementById('hamburgerMenu');
+            const closeBtn = document.getElementById('closeMenu');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if (hamburgerBtn && mobileMenu) {
+                hamburgerBtn.addEventListener('click', function() { mobileMenu.classList.add('active'); });
+            }
+            if (closeBtn && mobileMenu) {
+                closeBtn.addEventListener('click', function() { mobileMenu.classList.remove('active'); });
+            }
+        });
+    </script>
+</body>
+</html>

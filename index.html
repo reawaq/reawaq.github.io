@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رواق - شركة معمارية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f3efe8; 
+            --text-main: #3b3228; 
+            --text-muted: #7a6e60; 
+            --accent-color: #8c7861; 
+            --border-color: #dfd8cb; 
+            --white: #ffffff;
+            --footer-bg: #8c7861; 
+            --whatsapp-green: #25d366;
+            --btn-dark: #1a1815;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Tajawal', sans-serif; background-color: var(--bg-color); color: var(--text-main); line-height: 1.6; overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        .fade-in { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .fade-in.appear { opacity: 1; transform: translateY(0); }
+
+        .mobile-menu-overlay { position: fixed; top: 0; right: -100%; width: 100%; height: 100vh; background: var(--bg-color); z-index: 10000; display: flex; flex-direction: column; padding: 80px 30px 30px; transition: right 0.4s ease; }
+        .mobile-menu-overlay.active { right: 0; }
+        .mobile-menu-overlay a { font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .close-menu { position: absolute; top: 20px; right: 25px; background: none; border: none; font-size: 45px; color: var(--text-main); cursor: pointer; line-height: 1; }
+
+        header.navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; margin-top: 10px; transition: 0.3s; }
+        
+        /* إعدادات اللوكو الجديد */
+        .logo a { display: flex; align-items: center; }
+        .logo img { max-height: 55px; width: auto; object-fit: contain; }
+        .footer-bottom .logo img { max-height: 50px; filter: brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(330deg) brightness(0.9); }
+
+        .nav-links { display: flex; background-color: var(--white); padding: 5px 20px; border-radius: 50px; box-shadow: 0 2px 10px rgba(140, 120, 97, 0.05); gap: 20px; border: 1px solid var(--border-color); }
+        .nav-links a { font-weight: 500; font-size: 15px; padding: 10px 15px; border-radius: 30px; transition: 0.3s; color: var(--text-main); }
+        .nav-links a.active, .nav-links a:hover { background-color: var(--bg-color); color: var(--accent-color); }
+        .nav-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-primary { background-color: var(--btn-dark); color: var(--white); padding: 14px 28px; border-radius: 30px; font-weight: 700; border: none; cursor: pointer; transition: opacity 0.3s; display: flex; align-items: center; gap: 8px;}
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-lang { background-color: var(--white); border: 1px solid var(--border-color); padding: 12px 18px; border-radius: 30px; font-weight: 700; cursor: pointer; color: var(--text-main); }
+        .mobile-actions { display: none; }
+        .hamburger { background: transparent; border: 1px solid var(--border-color); border-radius: 50%; width: 42px; height: 42px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 20px; color: var(--text-main); }
+
+        .hero { display: flex; align-items: center; justify-content: space-between; margin-top: 60px; gap: 40px; }
+        .hero-content { flex: 1; }
+        .status-badge { display: inline-block; background-color: rgba(140, 120, 97, 0.1); color: var(--accent-color); padding: 6px 16px; border-radius: 30px; font-size: 13px; font-weight: 700; margin-bottom: 20px; border: 1px solid rgba(140, 120, 97, 0.2); }
+        .hero-content h1 { font-size: 64px; font-weight: 900; line-height: 1.1; margin-bottom: 20px; letter-spacing: -1px; color: var(--text-main); }
+        .hero-content p { color: var(--text-muted); font-size: 18px; margin-bottom: 30px; max-width: 90%; }
+        .hero-buttons { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .btn-outline { background-color: var(--white); border: 1px solid var(--border-color); color: var(--text-main); padding: 14px 28px; border-radius: 30px; font-weight: 700; cursor: pointer; transition: 0.3s;}
+        .btn-outline:hover { border-color: var(--text-main); }
+        .hero-note { font-size: 13px; color: var(--text-muted); margin-top: 10px; width: 100%; display: block; }
+        
+        .hero-image { flex: 1; height: 400px; border-radius: 40px; border: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        
+        .portfolio-section { margin-top: 100px; }
+        .section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+        .section-header h2 { font-size: 36px; font-weight: 900; }
+        .portfolio-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
+        .portfolio-card { background-color: var(--white); border: 1px solid var(--border-color); border-radius: 40px; overflow: hidden; display: block; transition: transform 0.3s, box-shadow 0.3s; }
+        .portfolio-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(140, 120, 97, 0.1); }
+        
+        .portfolio-image { height: 300px; border-bottom: 1px solid var(--border-color); position: relative; overflow: hidden; }
+        .hero-image img, .portfolio-image img, .service-image img, .project-image img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: inherit; }
+
+        .portfolio-info { padding: 40px; text-align: center; }
+        .portfolio-info h3 { font-size: 32px; font-weight: 900; margin-bottom: 15px; color: var(--text-main); }
+        .portfolio-info p { color: var(--text-muted); font-size: 16px; line-height: 1.8; margin-bottom: 0; }
+
+        .about-section { margin-top: 80px; background-color: var(--white); border: 1px solid var(--border-color); border-radius: 40px; padding: 60px; display: flex; align-items: stretch; gap: 40px; }
+        .about-box { flex: 1; background-color: var(--bg-color); border: 1px solid var(--border-color); border-radius: 24px; padding: 40px; }
+        .about-label { font-size: 14px; color: var(--accent-color); font-weight: 700; margin-bottom: 15px; display: block; }
+        .about-box h2 { font-size: 32px; font-weight: 900; line-height: 1.3; margin-bottom: 20px; color: var(--text-main); }
+        .about-box p { color: var(--text-muted); font-size: 16px; line-height: 1.9; }
+
+        footer { background-color: var(--footer-bg); color: var(--bg-color); margin-top: 100px; border-radius: 40px 40px 0 0; padding: 80px 20px 40px; text-align: center; }
+        .footer-top { display: flex; justify-content: space-between; align-items: center; gap: 60px; margin-bottom: 60px; text-align: right; }
+        .footer-cta { flex: 1; }
+        .footer-cta h2 { font-size: 56px; font-weight: 900; margin-bottom: 30px; color: var(--bg-color); }
+        .footer-cta p { color: #d1c8bb; margin-bottom: 15px; }
+        .phone-number { direction: ltr; display: inline-block; font-size: 24px; font-weight: 700; margin-bottom: 25px; color: var(--bg-color); }
+        .btn-white { background-color: var(--bg-color); color: var(--accent-color); padding: 14px 30px; border-radius: 30px; font-weight: 800; border: none; cursor: pointer; font-size: 16px; margin-bottom: 20px; transition: 0.3s; }
+        .btn-white:hover { background-color: var(--white); }
+        .footer-hours { flex: 0 0 400px; background-color: rgba(255, 255, 255, 0.05); padding: 40px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .footer-hours h3 { color: var(--bg-color); font-size: 22px; font-weight: 800; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        .hours-list { list-style: none; }
+        .hours-list li { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(243, 239, 232, 0.1); color: #d1c8bb; font-size: 15px; }
+        .hours-list li:last-child { border-bottom: none; padding-bottom: 0; }
+        .hours-list li.closed { opacity: 0.5; }
+        .hours-list li span:last-child { font-weight: 700; }
+        .footer-bottom { border-top: 1px solid rgba(243, 239, 232, 0.2); padding-top: 30px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #d1c8bb; }
+        .footer-links { display: flex; gap: 20px; }
+        .fab-whatsapp { position: fixed; bottom: 30px; left: 30px; background-color: var(--whatsapp-green); color: var(--white); padding: 12px 24px; border-radius: 30px; font-weight: 700; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3); z-index: 1000; }
+
+        @media (max-width: 768px) {
+            body { font-size: 15px; }
+            .container { padding: 0 15px; }
+            header.navbar { flex-direction: row; background-color: var(--white); border-radius: 50px; padding: 8px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-top: 15px; border: 1px solid var(--border-color); }
+            .nav-links, .nav-actions { display: none; } 
+            .mobile-actions { display: flex; gap: 10px; align-items: center; }
+            
+            .logo img { max-height: 40px; } 
+
+            .hero { flex-direction: column; margin-top: 40px; gap: 30px; }
+            .hero-content { width: 100%; display: flex; flex-direction: column; align-items: flex-start; }
+            .status-badge { align-self: flex-start; }
+            .hero-content h1 { font-size: 42px; margin-bottom: 20px; text-align: right; width: 100%; line-height: 1.2; }
+            .hero-content p { font-size: 16px; margin: 0 0 30px 0; width: 100%; text-align: right; }
+            .hero-buttons { flex-direction: column; width: 100%; align-items: flex-start; gap: 15px; }
+            .btn-primary { width: auto; min-width: 220px; justify-content: center; font-size: 16px; }
+            .btn-outline { width: auto; min-width: 220px; text-align: center; }
+            .hero-note { text-align: right; }
+            .hero-image { height: 250px; width: 100%; border-radius: 25px; margin-top: 10px; }
+            
+            .portfolio-section, .about-section { margin-top: 70px; }
+            .section-header { flex-direction: column; align-items: center; text-align: center; gap: 15px; margin-bottom: 30px; }
+            .section-header h2 { font-size: 30px; }
+            .portfolio-grid { grid-template-columns: 1fr; gap: 25px; }
+            .portfolio-card { border-radius: 25px; }
+            .portfolio-image { height: 220px; }
+            .portfolio-info { padding: 30px 20px; }
+            .portfolio-info h3 { font-size: 26px; }
+            
+            .about-section { flex-direction: column; padding: 0; background: transparent; border: none; gap: 25px; }
+            .about-box { background-color: var(--white); border: 1px solid var(--border-color); box-shadow: 0 10px 30px rgba(140, 120, 97, 0.05); border-radius: 25px; padding: 40px 25px; text-align: center; }
+            .about-box h2 { font-size: 26px; margin-bottom: 15px; }
+            .about-box p { font-size: 15px; margin-bottom: 0; }
+            
+            footer { margin-top: 70px; padding: 60px 15px 30px; border-radius: 30px 30px 0 0; }
+            .footer-top { flex-direction: column; text-align: center; gap: 40px; margin-bottom: 40px; }
+            .footer-cta h2 { font-size: 38px; }
+            .phone-number { font-size: 20px; }
+            .footer-hours { width: 100%; flex: 1 1 100%; padding: 30px 20px; border-radius: 20px; }
+            .footer-hours h3 { justify-content: center; font-size: 20px; }
+            .footer-bottom { flex-direction: column; text-align: center; gap: 25px; padding-top: 25px; }
+            .footer-links { flex-direction: column; gap: 15px; align-items: center; }
+            .fab-whatsapp { bottom: 15px; left: 15px; padding: 12px 20px; font-size: 14px; border-radius: 50px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-menu-overlay" id="mobileMenu">
+        <button class="close-menu" id="closeMenu">×</button>
+        <a href="index.html">الرئيسية</a>
+        <a href="services.html">الخدمات</a>
+        <a href="residential.html">الأعمال السكنية</a>
+        <a href="commercial.html">الأعمال التجارية</a>
+        <a href="https://iwtsp.com/966533771060" target="_blank">تواصل معنا</a>
+    </div>
+
+    <div class="container">
+        <header class="navbar fade-in">
+            <div class="mobile-actions">
+                <button class="hamburger" id="hamburgerMenu">☰</button>
+                <button class="btn-lang">EN</button>
+            </div>
+            <nav class="nav-links">
+                <a href="index.html" class="active">الرئيسية</a>
+                <a href="services.html">الخدمات</a>
+                <a href="residential.html">الأعمال السكنية</a>
+                <a href="commercial.html">الأعمال التجارية</a>
+                <a href="https://iwtsp.com/966533771060" target="_blank">تواصل</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="btn-lang">EN</button>
+                <button class="btn-primary" onclick="window.open('https://iwtsp.com/966533771060', '_blank')">ابدأ مشروعك</button>
+            </div>
+            <div class="logo">
+                <a href="index.html">
+                    <img src="rawaq.png" alt="رواق">
+                </a>
+            </div>
+        </header>
+
+        <section class="hero fade-in">
+            <div class="hero-content">
+                <span class="status-badge">● نصمم الفراغ ، لنصنع الأثر</span>
+                <h1>نصمم مساحات ومباني<br>تترك أثراً</h1>
+                <p>«رواق» شركة تصميم معماري وهندسي؛ فلل، مجمعات سكنية، ومشاريع تجارية.<br>نصممها من الصفر لتليق بتطلعاتك وتخدم أسلوب حياتك.</p>
+                
+                <div class="hero-buttons">
+                    <button class="btn-primary" onclick="window.open('https://iwtsp.com/966533771060', '_blank')">ابدأ مشروعك عبر واتساب ↗</button>
+                    <a href="services.html"><button class="btn-outline">استكشف خدماتنا</button></a>
+                    <span class="hero-note">نرد عادة خلال أقل من ساعة — من دون أي التزام.</span>
+                </div>
+            </div>
+            <div class="hero-image fade-in">
+                <img src="hero-main.jpg" alt="صورة الرئيسية">
+            </div>
+        </section>
+
+        <section class="portfolio-section">
+            <div class="section-header fade-in">
+                <div>
+                    <span style="color: var(--accent-color); font-weight: 700; font-size: 14px;">مشاريعنا</span>
+                    <h2>تصفح أعمالنا</h2>
+                </div>
+            </div>
+            
+            <div class="portfolio-grid">
+                <a href="residential.html" class="portfolio-card fade-in">
+                    <div class="portfolio-image">
+                        <img src="port-residential.jpg" alt="أعمال سكنية">
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>أعمال سكنية</h3>
+                        <p>فلل، قصور، ومجمعات سكنية مصممة لتلائم أسلوب حياتك براحة وفخامة، مع اهتمام بأدق التفاصيل المعمارية والداخلية.</p>
+                    </div>
+                </a>
+
+                <a href="commercial.html" class="portfolio-card fade-in">
+                    <div class="portfolio-image">
+                        <img src="port-commercial.jpg" alt="أعمال تجارية">
+                    </div>
+                    <div class="portfolio-info">
+                        <h3>أعمال تجارية</h3>
+                        <p>مكاتب، معارض، ومطاعم مصممة لتعزيز هويتك التجارية، وتقديم تجربة مميزة للعملاء وزيادة إنتاجية بيئة العمل.</p>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <section class="about-section">
+            <div class="about-box fade-in">
+                <span class="about-label">من نحن</span>
+                <h2>توازن الجمال العملي<br>والقيمة المستدامة</h2>
+                <p>نحن شركة معمارية متخصصة في تقديم حلول تصميم مبتكرة للمشاريع السكنية والتجارية، تجمع بين الإبداع والوظيفة والجودة. نسعى إلى تحويل الأفكار إلى مساحات ملهمة تعكس هوية عملائنا وتلبي احتياجاتهم، مع الاهتمام بأدق التفاصيل والالتزام بأعلى معايير التصميم والتنفيذ. هدفنا هو تقديم تجربة معمارية متكاملة توازن بين الجمال العملي والقيمة المستدامة في كل مشروع.</p>
+            </div>
+
+            <div class="about-box fade-in">
+                <span class="about-label">رؤيتنا</span>
+                <h2>الخيار الأول في<br>التصميم المعماري</h2>
+                <p>أن نكون الخيار الأول في مجال التصميم المعماري السكني والتجاري، من خلال تقديم حلول مبتكرة تجمع بين الإبداع، والجودة، والاستدامة، لنصنع مساحات تعكس هوية عملائنا وتلبي تطلعاتهم، وتسهم في بناء بيئات عصرية ذات قيمة مستدامة.</p>
+            </div>
+        </section>
+    </div>
+
+    <footer class="fade-in">
+        <div class="container">
+            <div class="footer-top fade-in">
+                <div class="footer-cta">
+                    <p>عندك فكرة مشروع؟</p>
+                    <h2>لنبنيه معاً.</h2>
+                    <p>تواصل معنا عبر الرقم المباشر:</p>
+                    <span class="phone-number">+966 53 377 1060</span><br>
+                    <button class="btn-white" onclick="window.open('https://iwtsp.com/966533771060', '_blank')">راسلنا على واتساب ↗</button>
+                </div>
+                
+                <div class="footer-hours fade-in">
+                    <h3>🕒 أوقات العمل</h3>
+                    <ul class="hours-list">
+                        <li><span>الأحد</span><span>9:00 ص - 5:00 م</span></li>
+                        <li><span>الاثنين</span><span>9:00 ص - 5:00 م</span></li>
+                        <li><span>الثلاثاء</span><span>9:00 ص - 5:00 م</span></li>
+                        <li><span>الاربعاء</span><span>9:00 ص - 5:00 م</span></li>
+                        <li><span>الخميس</span><span>9:00 ص - 5:00 م</span></li>
+                        <li class="closed"><span>الجمعة</span><span>مغلق</span></li>
+                        <li class="closed"><span>السبت</span><span>مغلق</span></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom fade-in">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="rawaq.png" alt="رواق">
+                    </a>
+                </div>
+                <div class="footer-links">
+                    <a href="https://iwtsp.com/966533771060" target="_blank">تواصل معنا</a>
+                    <a href="https://www.instagram.com/rwaq.design" target="_blank">Instagram</a>
+                    <a href="https://www.tiktok.com/@rwaq.design?_r=1&_t=ZS-98Yrxf0CAsO" target="_blank">TikTok</a>
+                </div>
+                <div>
+                    © ٢٠٢٦ شركة رواق — جميع الحقوق محفوظة
+                </div>
+            </div>
+            <div style="font-size: 11px; margin-top: 20px; text-align: center; opacity: 0.7;">
+                RIWAQ LTD — شركة هندسية خاصة، متخصصة في التصميم المعماري والداخلي
+            </div>
+        </div>
+    </footer>
+
+    <a href="https://iwtsp.com/966533771060" target="_blank" class="fab-whatsapp fade-in">واتساب ↗</a>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const faders = document.querySelectorAll('.fade-in');
+            const appearOptions = { threshold: 0.15, rootMargin: "0px 0px -50px 0px" };
+            const appearOnScroll = new IntersectionObserver(function(entries, observer) {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('appear');
+                    observer.unobserve(entry.target);
+                });
+            }, appearOptions);
+            faders.forEach(fader => { appearOnScroll.observe(fader); });
+
+            const hamburgerBtn = document.getElementById('hamburgerMenu');
+            const closeBtn = document.getElementById('closeMenu');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if (hamburgerBtn && mobileMenu) {
+                hamburgerBtn.addEventListener('click', function() {
+                    mobileMenu.classList.add('active');
+                });
+            }
+            if (closeBtn && mobileMenu) {
+                closeBtn.addEventListener('click', function() {
+                    mobileMenu.classList.remove('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
