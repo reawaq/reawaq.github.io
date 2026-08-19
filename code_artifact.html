@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>حاسبة اللياقة الذكية 🏋️‍♂️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --x: 50vw;
+            --y: 50vh;
+            --clip-r: min(18vw, 75px); 
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Tajawal', sans-serif;
+            overflow: hidden; 
+            background-color: #f4f7f6;
+            user-select: none; 
+            -webkit-user-select: none;
+            touch-action: none; 
+            overscroll-behavior: none;
+        }
+
+        /* --- الطبقات الأساسية --- */
+        .base-layer {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1; padding: 15px; box-sizing: border-box;
+        }
+
+        .big-background-text {
+            position: absolute; font-size: clamp(6rem, 20vw, 25vw); font-weight: 800;
+            color: #e2e8e4; z-index: -1; bottom: 12%; line-height: 1; letter-spacing: 5px;
+        }
+
+        .floor {
+            position: absolute; bottom: 0; width: 100%; height: 80px;
+            background: #dbe4e0; border-top: 2px solid #cbd6d0; z-index: 2;
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(0,0,0,0.02) 50px, rgba(0,0,0,0.02) 52px);
+        }
+
+        .hidden-layer {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background-color: #1e272e; z-index: 3; pointer-events: none;
+            clip-path: circle(var(--clip-r) at var(--x) var(--y));
+            -webkit-clip-path: circle(var(--clip-r) at var(--x) var(--y));
+        }
+
+        .hidden-layer .big-background-text { color: #0fb9b1; }
+
+        .app-wrapper {
+            position: relative; width: 100%; max-width: 420px; z-index: 100;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* --- صندوق التطبيق المحسن للهواتف --- */
+        .app-container {
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 25px 20px 40px 20px; /* مساحة إضافية بالأسفل لتسهيل رؤية الكروت */
+            border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            text-align: center; width: 95%; pointer-events: auto;
+            border: 1px solid #edf2f0; 
+            max-height: 78vh; /* زيادة بسيطة في الطول لدعم الشاشات */
+            overflow-y: auto;
+            scroll-behavior: smooth; /* تمرير سلس */
+        }
+        .app-container::-webkit-scrollbar { display: none; }
+
+        .app-container h2 { 
+            color: #2c3e50; margin-top: 5px; margin-bottom: 20px; 
+            font-size: clamp(1.4rem, 5vw, 1.8rem); font-weight: 800;
+        }
+
+        /* --- نظام الأهداف --- */
+        .goals-container {
+            display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;
+        }
+        .goals-title {
+            font-size: 1rem; font-weight: 700; color: #7f8c8d; margin-bottom: 5px;
+        }
+        .goal-btn {
+            padding: 12px; border-radius: 12px; border: 2px solid #ecf0f1;
+            background: #fff; color: #2c3e50; font-family: 'Tajawal', sans-serif;
+            font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .goal-btn:hover { border-color: #0fb9b1; background: #f0fcfb; }
+        .goal-btn.active-goal {
+            background: linear-gradient(135deg, #0fb9b1, #2bcbba);
+            color: white; border-color: transparent; box-shadow: 0 4px 10px rgba(15, 185, 177, 0.3);
+            transform: scale(1.02);
+        }
+
+        /* --- قسم الرفع --- */
+        #uploadSection {
+            display: none; 
+            animation: fadeIn 0.5s ease forwards;
+            border-top: 2px dashed #ecf0f1; padding-top: 15px; margin-top: 10px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .upload-btn, .analyze-btn {
+            display: block; width: 100%; padding: 14px; border-radius: 16px; border: none;
+            font-family: 'Tajawal', sans-serif; font-size: 1.1rem; font-weight: 700;
+            cursor: pointer; transition: all 0.2s ease; margin-bottom: 12px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .upload-btn { background: #f1f2f6; color: #2f3542; border: 2px dashed #ced6e0; }
+        .upload-btn:active { transform: scale(0.97); }
+        input[type="file"] { display: none; }
+        
+        .analyze-btn { 
+            background: linear-gradient(135deg, #ff4757, #ff6b81); color: white; 
+            display: none; box-shadow: 0 6px 15px rgba(255, 71, 87, 0.3);
+        }
+        .analyze-btn:active { transform: scale(0.97); box-shadow: none; }
+        
+        #imagePreview {
+            width: 100%; height: 180px; border-radius: 16px; margin-bottom: 15px;
+            display: none; object-fit: cover; border: 2px solid #0fb9b1;
+        }
+        
+        /* --- اللودر --- */
+        .food-loader { display: none; justify-content: center; gap: 15px; margin: 20px 0; }
+        .bounce-icon { font-size: 2rem; animation: bounce 0.6s infinite alternate cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .bounce-icon:nth-child(2) { animation-delay: 0.2s; }
+        .bounce-icon:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); } 100% { transform: translateY(-20px) scale(1.1); filter: drop-shadow(0 15px 5px rgba(0,0,0,0.1)); } }
+
+        /* --- كروت النتائج وشريط التحذير --- */
+        .result-container {
+            display: none; flex-direction: column; gap: 12px; animation: slideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            padding-bottom: 20px;
+        }
+
+        .suitability-banner {
+            border-radius: 12px; padding: 12px 15px; text-align: right; font-weight: 700;
+            font-size: 0.95rem; line-height: 1.5; display: flex; align-items: center; gap: 10px;
+        }
+        .suitability-banner.good { background: #dff9fb; color: #22a6b3; border: 1px solid #c7ecee; }
+        .suitability-banner.bad { background: #fff3e0; color: #e67e22; border: 1px solid #ffeaa7; }
+
+        .cal-card {
+            background: linear-gradient(135deg, #2c3e50, #34495e); border-radius: 16px; padding: 20px;
+            color: white; display: flex; flex-direction: column; align-items: center; box-shadow: 0 8px 20px rgba(44, 62, 80, 0.3);
+        }
+        .cal-card .val { font-size: 2.8rem; font-weight: 800; line-height: 1; margin: 5px 0; color: #0fb9b1; }
+        .cal-card .lbl { font-size: 1rem; font-weight: 700; opacity: 0.9; }
+
+        .macros-row { display: flex; gap: 10px; justify-content: space-between; }
+        .macro-box {
+            flex: 1; background: #f8f9fa; border: 1px solid #ecf0f1; border-radius: 14px; padding: 12px 5px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .macro-box span { font-size: 1.3rem; }
+        .macro-box .m-val { font-size: 1.1rem; font-weight: 800; color: #2c3e50; margin-top: 5px; }
+        .macro-box .m-lbl { font-size: 0.8rem; font-weight: 700; color: #7f8c8d; }
+
+        .details-card {
+            background: #fff; border-radius: 16px; padding: 15px; text-align: right;
+            border: 1px solid #ecf0f1; font-size: 0.95rem; color: #34495e; line-height: 1.8; word-wrap: break-word;
+        }
+        .details-card strong { color: #0fb9b1; }
+
+        /* --- شخصية الشعلة --- */
+        .baby-chick-wrapper {
+            position: absolute; top: -45px; left: 50%; width: 0; height: 0; z-index: 101; pointer-events: none;
+        }
+        .flame-character {
+            position: absolute; bottom: 0; left: -15px; width: 30px; height: 30px; animation: flameFloat 16s infinite ease-in-out;
+        }
+        .flame-shape {
+            position: absolute; width: 30px; height: 30px; background: radial-gradient(circle at 30% 30%, #feca57 0%, #ff6b6b 80%);
+            border-radius: 50% 0 50% 50%; transform: rotate(-45deg); box-shadow: inset -2px -2px 5px rgba(255,0,0,0.3);
+        }
+        .flame-content { position: absolute; width: 100%; height: 100%; transform: rotate(45deg); }
+        .f-eye { position: absolute; top: 12px; width: 6px; height: 6px; background: #111; border-radius: 50%; animation: blink 4s infinite; }
+        .f-eye.l { left: 8px; } .f-eye.r { right: 8px; }
+        .f-smile { position: absolute; top: 18px; left: 11px; width: 8px; height: 4px; border-bottom: 2px solid #111; border-radius: 50%; }
+        
+        .baby-sign {
+            position: absolute; top: -45px; left: 50%; margin-left: -45px; width: 90px;
+            background: #fff; border: 2px solid #2f3542; color: #2f3542;
+            font-family: 'Tajawal', sans-serif; font-size: 13px; font-weight: 700; text-align: center;
+            padding: 4px; border-radius: 8px; box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            opacity: 0; transform-origin: bottom center; animation: babySignAnim 16s infinite ease-in-out;
+        }
+        .baby-sign::after {
+            content: ''; position: absolute; bottom: -8px; left: 50%; margin-left: -4px;
+            border-width: 8px 4px 0; border-style: solid; border-color: #fff transparent transparent transparent;
+        }
+
+        @keyframes flameFloat {
+            0%, 5%, 95%, 100% { transform: translateY(0) translateX(0); }
+            10%, 25% { transform: translateY(20px) translateX(0) scale(1.1); }
+            32%, 45% { transform: translateY(-15px) translateX(0) scale(1); }
+            52%, 65% { transform: translateY(-5px) translateX(0) scale(1.2); }
+            70% { transform: translateY(-10px) translateX(15px); }
+            72% { transform: translateY(-10px) translateX(-15px); }
+            74% { transform: translateY(-10px) translateX(10px); }
+            76%, 90% { transform: translateY(-15px) translateX(0); }
+        }
+        @keyframes babySignAnim {
+            0%, 74% { opacity: 0; transform: translateY(10px) scale(0); }
+            76%, 90% { opacity: 1; transform: translateY(-15px) scale(1); } 
+            92%, 100% { opacity: 0; transform: translateY(10px) scale(0); }
+        }
+        @keyframes blink { 0%, 96%, 100% { transform: scaleY(1); } 98% { transform: scaleY(0.1); } }
+
+        /* --- شخصية الأفوكادو --- */
+        #chicken-system { position: absolute; top: 0; left: 0; width: 0; height: 0; z-index: 102; pointer-events: none; }
+        #arm { position: absolute; top: -35px; left: 0; height: 4px; background: #0fb9b1; box-shadow: 0 0 10px #0fb9b1; transform-origin: left center; border-radius: 4px; z-index: 4; }
+        #chicken-visuals { position: absolute; bottom: 0; left: -30px; width: 60px; height: 70px; transform-origin: bottom center; transition: transform 0.1s ease-out; }
+        .avocado-body { position: absolute; bottom: 15px; width: 60px; height: 75px; background: #78e08f; border: 4px solid #079992; border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%; transition: transform 0.1s; }
+        .avo-pit { position: absolute; bottom: 12px; left: 16px; width: 28px; height: 28px; background: #b71540; border-radius: 50%; box-shadow: inset -4px -4px 0 rgba(0,0,0,0.2); }
+        .avo-headband { position: absolute; top: 18px; left: -2px; width: 64px; height: 10px; background: #eb2f06; transform: rotate(-5deg); z-index: 3; box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+        .eye { position: absolute; top: 32px; width: 14px; height: 14px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; z-index: 4; border: 2px solid #079992; }
+        .eye.left { right: 28px; } .eye.right { right: 8px; }
+        .pupil { width: 6px; height: 6px; background: #111; border-radius: 50%; }
+        .leg { position: absolute; bottom: 0; width: 4px; height: 16px; background: #079992; transform-origin: top center; transition: transform 0.2s; }
+        .leg.left { right: 35px; } .leg.right { right: 15px; }
+        .foot { position: absolute; bottom: 0; right: -4px; width: 12px; height: 5px; background: #079992; border-radius: 3px; }
+
+        @keyframes walkLeft { 0%, 50%, 100% { transform: rotate(0deg); } 25% { transform: rotate(35deg); } 75% { transform: rotate(-35deg); } }
+        @keyframes walkRight { 0%, 50%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-35deg); } 75% { transform: rotate(35deg); } }
+        .walking:not(.flying):not(.jumping) .leg.left { animation: walkLeft 0.4s infinite linear; }
+        .walking:not(.flying):not(.jumping) .leg.right { animation: walkRight 0.4s infinite linear; }
+        .flying .leg.left { transform: rotate(-25deg); } .flying .leg.right { transform: rotate(15deg); }
+        .jumping .avocado-body { transform: scaleY(1.05) scaleX(0.95); }
+        .jumping .leg.left { transform: rotate(20deg); } .jumping .leg.right { transform: rotate(-20deg); }
+
+        /* --- عدسة الفحص --- */
+        .heart-wrapper { position: absolute; top: 0; left: 0; transform: translate(var(--x), var(--y)); pointer-events: none; z-index: 105; }
+        .scanner-lens { position: absolute; width: 50px; height: 50px; top: -25px; left: -25px; border: 2px dashed #0fb9b1; border-radius: 50%; animation: spinLens 4s linear infinite; }
+        .scanner-lens::after { content: ''; position: absolute; top: 50%; left: 50%; width: 8px; height: 8px; background: #ff4757; border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 10px #ff4757; }
+        @keyframes spinLens { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div class="base-layer">
+        
+        <div class="app-wrapper">
+            <div class="baby-chick-wrapper">
+                <div class="flame-character">
+                    <div class="baby-sign">كم السعرات؟</div>
+                    <div class="flame-shape"></div>
+                    <div class="flame-content">
+                        <div class="f-eye l"></div>
+                        <div class="f-eye r"></div>
+                        <div class="f-smile"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-container" id="appContainer">
+                <h2>حاسبة اللياقة الذكية ⚡</h2>
+                
+                <!-- قسم اختيار الهدف -->
+                <div class="goals-title">ما هو نظامك الغذائي الحالي؟</div>
+                <div class="goals-container" id="goalsContainer">
+                    <button class="goal-btn" data-goal="تضخيم عضلي صافٍ بدون دهون">💪 تضخيم عضلي صافٍ</button>
+                    <button class="goal-btn" data-goal="تنشيف وحرق للدهون">🔥 تنشيف وحرق للدهون</button>
+                    <button class="goal-btn" data-goal="محافظة على الوزن الحالي">⚖️ محافظة على الوزن</button>
+                </div>
+
+                <!-- قسم الرفع -->
+                <div id="uploadSection">
+                    <label class="upload-btn">
+                        📸 التقط أو ارفع صورة للطعام
+                        <input type="file" id="imageInput" accept="image/*" capture="environment">
+                    </label>
+
+                    <img id="imagePreview" alt="معاينة الطعام">
+                    
+                    <button id="analyzeBtn" class="analyze-btn">🚀 تحليل الوجبة</button>
+                    
+                    <div id="loader" class="food-loader">
+                        <div class="bounce-icon">🍎</div>
+                        <div class="bounce-icon">🥩</div>
+                        <div class="bounce-icon">🥑</div>
+                    </div>
+                    
+                    <div id="resultContainer" class="result-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="big-background-text">BULK</div>
+    </div>
+    
+    <div class="floor"></div>
+
+    <div class="hidden-layer">
+        <div class="big-background-text">73 KG</div>
+    </div>
+
+    <div class="heart-wrapper">
+        <div class="scanner-lens"></div>
+    </div>
+
+    <div id="chicken-system">
+        <div id="arm"></div>
+        <div id="chicken-visuals">
+            <div class="avocado-body">
+                <div class="avo-headband"></div>
+                <div class="eye left"><div class="pupil" id="pupil1"></div></div>
+                <div class="eye right"><div class="pupil" id="pupil2"></div></div>
+                <div class="avo-pit"></div>
+            </div>
+            <div class="leg left"><div class="foot"></div></div>
+            <div class="leg right"><div class="foot"></div></div>
+        </div>
+    </div>
+
+    <script>
+        // --- اختيار الهدف ---
+        const goalBtns = document.querySelectorAll('.goal-btn');
+        const uploadSection = document.getElementById('uploadSection');
+        const appContainer = document.getElementById('appContainer');
+        let currentGoal = "";
+
+        goalBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                goalBtns.forEach(b => b.classList.remove('active-goal'));
+                this.classList.add('active-goal');
+                currentGoal = this.getAttribute('data-goal');
+                uploadSection.style.display = 'block';
+                document.getElementById('resultContainer').style.display = 'none';
+                
+                // التمرير قليلاً لأسفل لرؤية قسم الرفع بشكل أوضح
+                setTimeout(() => {
+                    uploadSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            });
+        });
+
+        // --- حركة الشخصيات بالماوس ---
+        const root = document.documentElement;
+        const chickenSystem = document.getElementById('chicken-system');
+        const chickenVisuals = document.getElementById('chicken-visuals');
+        const arm = document.getElementById('arm');
+        const pupil1 = document.getElementById('pupil1');
+        const pupil2 = document.getElementById('pupil2');
+        
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let chickenX = mouseX;
+        let chickenY = window.innerHeight - 80;
+        let isFacingRight = true;
+        let jumpY = 0, velocityY = 0;
+        const gravity = 1.2;
+
+        function updateMouse(e) {
+            mouseX = e.touches ? e.touches[0].clientX : e.clientX;
+            mouseY = e.touches ? e.touches[0].clientY : e.clientY;
+            root.style.setProperty('--x', mouseX + 'px');
+            root.style.setProperty('--y', mouseY + 'px');
+        }
+
+        window.addEventListener('mousemove', updateMouse);
+        window.addEventListener('touchmove', updateMouse, { passive: false });
+
+        function triggerJump(e) {
+            if (e.target.closest('.app-container')) return;
+            if (jumpY === 0 && !chickenVisuals.classList.contains('flying')) {
+                velocityY = -18; chickenVisuals.classList.add('jumping');
+            }
+        }
+        window.addEventListener('mousedown', triggerJump);
+        window.addEventListener('touchstart', triggerJump, { passive: true });
+
+        function animate() {
+            let floorY = window.innerHeight - 80;
+            let dxChicken = mouseX - chickenX;
+            chickenX += dxChicken * 0.05;
+
+            if (Math.abs(dxChicken) > 3) chickenVisuals.classList.add('walking');
+            else chickenVisuals.classList.remove('walking');
+
+            if (dxChicken > 15 && !isFacingRight) { chickenVisuals.style.transform = 'scaleX(1)'; isFacingRight = true; } 
+            else if (dxChicken < -15 && isFacingRight) { chickenVisuals.style.transform = 'scaleX(-1)'; isFacingRight = false; }
+
+            let targetY = Math.min(floorY, mouseY + 140);
+            chickenY += (targetY - chickenY) * 0.08;
+
+            if (chickenY < floorY - 10) chickenVisuals.classList.add('flying');
+            else chickenVisuals.classList.remove('flying');
+
+            if (velocityY !== 0 || jumpY < 0) {
+                velocityY += gravity; jumpY += velocityY;
+                if (jumpY > 0) { jumpY = 0; velocityY = 0; chickenVisuals.classList.remove('jumping'); }
+            }
+
+            let renderY = chickenY + jumpY;
+            chickenSystem.style.transform = `translate(${chickenX}px, ${renderY}px)`;
+
+            let shoulderY = renderY - 40; 
+            let dyArm = mouseY - shoulderY;
+            let dxArm = mouseX - chickenX;
+            let angle = Math.atan2(dyArm, dxArm) * (180 / Math.PI);
+            let distance = Math.sqrt(dxArm * dxArm + dyArm * dyArm);
+
+            arm.style.width = distance + 'px';
+            arm.style.transform = `rotate(${angle}deg)`;
+
+            function updatePupil(pupilElem) {
+                let rect = pupilElem.parentElement.getBoundingClientRect();
+                let eyeCenterX = rect.left + rect.width / 2;
+                let eyeCenterY = rect.top + rect.height / 2;
+                let dxEye = mouseX - eyeCenterX;
+                let dyEye = mouseY - eyeCenterY;
+                let angleEye = Math.atan2(dyEye, dxEye);
+                let distEye = Math.min(3, Math.sqrt(dxEye*dxEye + dyEye*dyEye) * 0.1);
+                let moveX = Math.cos(angleEye) * distEye;
+                let moveY = Math.sin(angleEye) * distEye;
+                if (!isFacingRight) moveX = -moveX;
+                pupilElem.style.transform = `translate(${moveX}px, ${moveY}px)`;
+            }
+            updatePupil(pupil1); updatePupil(pupil2);
+            requestAnimationFrame(animate);
+        }
+        window.addEventListener('resize', () => { if (jumpY === 0) chickenY = window.innerHeight - 80; });
+        animate();
+
+        // --- تحليل الـ API ---
+        const GEMINI_API_KEY = 'AQ.Ab8RN6I6KSEfMmapyasVqIjuwJOCGJMll9I6stwewEcEtCUTIQ'; 
+
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loader = document.getElementById('loader');
+        const resultContainer = document.getElementById('resultContainer');
+        let base64Image = "";
+        let currentMimeType = "image/jpeg";
+
+        imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                currentMimeType = file.type || "image/jpeg"; 
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    analyzeBtn.style.display = 'block';
+                    base64Image = e.target.result.split(',')[1];
+                    resultContainer.style.display = 'none';
+                    
+                    // تمرير تلقائي لرؤية زر التحليل
+                    setTimeout(() => {
+                        analyzeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 100);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        analyzeBtn.addEventListener('click', async function() {
+            if (!base64Image) return;
+
+            loader.style.display = 'flex';
+            analyzeBtn.style.display = 'none';
+            resultContainer.style.display = 'none';
+
+            // تمرير نحو اللودر أثناء الانتظار
+            setTimeout(() => {
+                loader.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 50);
+
+            const promptText = `أنت خبير تغذية وذكاء اصطناعي دقيق جداً. 
+المستخدم لديه هدف رياضي وهو: "${currentGoal}".
+تعرف على الوجبة في الصورة بدقة عالية وحلل قيمتها الغذائية لصحن ذو حجم طبيعي. ثم قيم ما إذا كانت هذه الوجبة مناسبة لـ "${currentGoal}" أم لا. 
+
+أرجع البيانات بصيغة JSON فقط بهذه المفاتيح حصراً (بدون أي نص خارجي، وباللغة العربية الفصحى):
+{
+  "name": "اسم الوجبة بدقة",
+  "origin": "بلد المنشأ",
+  "ingredients": "المكونات الأساسية",
+  "calories": "رقم فقط",
+  "protein": "رقم فقط",
+  "carbs": "رقم فقط",
+  "fats": "رقم فقط",
+  "suitability_msg": "رسالة قصيرة جداً (سطر واحد) تخبره إذا كانت مناسبة لهدفه أم لا والسبب باللغة العربية الفصحى",
+  "is_suitable": true أو false
+}`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: promptText },
+                                { inlineData: { mimeType: currentMimeType, data: base64Image } }
+                            ]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.error.message);
+
+                let rawText = data.candidates[0].content.parts[0].text;
+                let cleanJsonString = rawText.match(/\{[\s\S]*\}/)[0];
+                let parsed;
+                try {
+                    parsed = JSON.parse(cleanJsonString);
+                } catch (parseError) {
+                    throw new Error("حدث خطأ في قراءة بيانات الذكاء الاصطناعي، يُرجى المحاولة بصورة أخرى.");
+                }
+                
+                let alertClass = parsed.is_suitable === true ? "good" : "bad";
+                let alertIcon = parsed.is_suitable === true ? "✅" : "⚠️";
+
+                resultContainer.innerHTML = `
+                    <div class="suitability-banner ${alertClass}">
+                        <span>${alertIcon}</span>
+                        <span>${parsed.suitability_msg || 'تم التقييم بناءً على هدفك.'}</span>
+                    </div>
+
+                    <div class="cal-card">
+                        <span class="lbl">السعرات الحرارية 🔥</span>
+                        <span class="val">${parsed.calories || '0'}</span>
+                        <span class="lbl">Kcal</span>
+                    </div>
+                    
+                    <div class="macros-row">
+                        <div class="macro-box">
+                            <span>🥩</span>
+                            <span class="m-val">${parsed.protein || '0'}g</span>
+                            <span class="m-lbl">بروتين</span>
+                        </div>
+                        <div class="macro-box">
+                            <span>🍞</span>
+                            <span class="m-val">${parsed.carbs || '0'}g</span>
+                            <span class="m-lbl">كارب</span>
+                        </div>
+                        <div class="macro-box">
+                            <span>🥑</span>
+                            <span class="m-val">${parsed.fats || '0'}g</span>
+                            <span class="m-lbl">دهون</span>
+                        </div>
+                    </div>
+                    
+                    <div class="details-card">
+                        <p>🍽️ <strong>الوجبة:</strong> ${parsed.name || 'غير معروفة'}</p>
+                        <p>🌍 <strong>بلد المنشأ:</strong> ${parsed.origin || 'غير معروف'}</p>
+                        <p>🥗 <strong>المكونات:</strong> ${parsed.ingredients || 'غير واضحة'}</p>
+                    </div>
+                `;
+                
+                resultContainer.style.display = 'flex';
+
+                // النزول التلقائي السلس إلى النتيجة بمجرد ظهورها
+                setTimeout(() => {
+                    resultContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 200);
+
+            } catch (error) {
+                console.error(error);
+                resultContainer.innerHTML = `<div class="details-card" style="color:#e74c3c;">⚠️ عذراً، حدث خطأ: <br> ${error.message}</div>`;
+                resultContainer.style.display = 'flex';
+            } finally {
+                loader.style.display = 'none';
+                analyzeBtn.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
